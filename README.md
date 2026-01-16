@@ -1,10 +1,14 @@
-# Deploying ESPresense on Seeed Studio XIAO ESP32C3
+# Deploying ESPresense on Seeed Studio XIAO ESP32C3 with Home Assistant
 
-This document describes how to integrate **ESPresense**—an open-source Bluetooth presence detection system—onto the **Seeed Studio XIAO ESP32-C3**. 
-An XIAO ESP32-C3 based presence detection node for use with the [Home Assistant](https://www.home-assistant.io/) [`mqtt_room` component](https://www.home-assistant.io/components/sensor.mqtt_room/) for indoor positioning
+This document describes how to integrate the open-source Bluetooth presence detection system, **ESPresense**, with the **Seeed Studio XIAO ESP32-C3**. The presence detection node based on the XIAO ESP32-C3 can work with the [MQTT Room component](https://www.home-assistant.io/components/sensor.mqtt_room/) of Home Assistant to enable indoor positioning.
 
+---
 
-## Recent Updates
+## Project Overview
+
+**ESPresense** is an open-source Bluetooth Low Energy (BLE) presence detection system designed to work with **Home Assistant** using **MQTT**.
+
+In this migration:
 
 ### 1. Added XIAO ESP32-C3 Build Environment
 
@@ -31,7 +35,7 @@ build_flags =
 
 To make data reporting more responsive, several parameters in `defaults.h` were tuned as follows:
 
-#### A. Increased Movement Sensitivity (Key Change)
+#### A. Increased Movement Sensitivity
 
 The distance threshold that triggers an early report has been reduced from **0.5 m** to **0.1 m**. Even small movements will now activate the “early reporting” logic.
 
@@ -58,289 +62,164 @@ When using 2.4 GHz Wi-Fi (non-C5 chips), Bluetooth scanning is adjusted to avoid
 
 This change helps reduce internal contention and minimizes latency caused by radio resource preemption.
 
-
-Below is a **full English technical wiki–style guide**, rewritten with clear structure, precise terminology, and step-by-step operational detail.
-The tone, level of detail, and wording are aligned with what you would typically publish on **GitHub Wiki / ReadTheDocs / ESPresense Docs extensions**.
-
 ---
 
-
-## 1. Project Overview
-
-**ESPresense** is an open-source Bluetooth Low Energy (BLE) presence detection system designed to work with **Home Assistant** using **MQTT**.
-
-In this migration:
-
-* ESPresense is successfully compiled and deployed on **Seeed Studio XIAO ESP32C3**
-* BLE scanning, Wi-Fi provisioning, and MQTT publishing work correctly
-* Devices are automatically discovered by Home Assistant
-* Room-level presence detection is achieved via `mqtt_room`
-
----
-
-## 2. Fatures
-
-* ✅ ESPresense builds and runs successfully on XIAO ESP32C3
-* ✅ BLE, Wi-Fi, and MQTT modules compile without modification
-* ✅ Web-based Wi-Fi/MQTT configuration portal works
-* ✅ Seamless integration with Home Assistant
-* ✅ BLE device detection verified via MQTT
-
----
-
-## 3. Hardware Requirements
+## Hardware Requirements
 
 * Seeed Studio **XIAO ESP32C3**
 * USB-C cable (data capable)
 * PC (Windows/macOS/Linux)
 * Stable Wi-Fi network (2.4 GHz)
-* Home Assistant instance (HA OS / Supervised recommended)
+* Home Assistant instance
 
 ---
 
-## 4. Software & Tools
+## Software & Tools
 
-### Required Software
-
-| Tool                               | Purpose                   |
-| ---------------------------------- | ------------------------- |
-| Git                                | Source code management    |
-| ESP-IDF toolchain (via ESPresense) | Firmware build            |
-| esptool                            | Flash erase & diagnostics |
-| Web browser                        | Device configuration      |
-| Home Assistant                     | Presence integration      |
-| Mosquitto Broker (HA Add-on)       | MQTT backend              |
-| MQTT Explorer (optional)           | MQTT debugging            |
-| nRF Connect (Android only)         | BLE advertising           |
+| Tool                               | Purpose                                               |
+| ---------------------------------- | ----------------------------------------------------- |
+| Git                                | Source code management                                |
+| **PlatformIO**                     | Build system & flashing tool                          |
+| ESP-IDF toolchain (via ESPresense) | Firmware build                                        |
+| Web browser                        | Device configuration                                  |
+| Home Assistant                     | Presence integration                                  |
+| Mosquitto Broker (HA Add-on)       | MQTT backend                                          |
+| MQTT Explorer (optional)           | MQTT debugging                                        |
+| nRF Connect (Android only)         | BLE advertising                                       |
 
 ---
 
-## 5. Flash Preparation (Erase Flash)
 
-Before flashing ESPresense, **fully erase the device flash**.
-
-### Steps
-
-1. Connect XIAO ESP32C3 to your PC via USB
-2. Open **PowerShell / Terminal**
-3. Navigate to your ESPresense project directory
-4. Run the following command:
-
-```bash
-esptool erase-flash
-```
-
-### Expected Output (Example)
-
-```
-esptool v5.1.0
-Connected to ESP32-C3 on COM27:
-Chip type:          ESP32-C3 (QFN32) (revision v0.4)
-Features:           Wi-Fi, BT 5 (LE), Single Core, 160MHz
-Embedded Flash:     4MB
-Crystal frequency:  40MHz
-USB mode:           USB-Serial/JTAG
-MAC:                ec:da:3b:bd:ea:58
-
-Flash memory erased successfully.
-```
-
----
-
-## 6. Home Assistant – MQTT Broker Setup
+## 1. Home Assistant – MQTT Broker Setup
 
 ### Install Mosquitto Broker Add-on
 
-1. Open **Home Assistant Web UI**
-2. Click **Settings** (left sidebar)
-3. Click **Add-ons**
-4. Click **Add-on Store**
-5. Search for **Mosquitto broker**
-6. Click **Install**
-7. After installation:
+- Open **Home Assistant**
 
-   * Click **Start**
-   * Enable:
+   > If you haven't set up Home Assistant yet, please refer to this [guide](https://www.home-assistant.io/installation/) for configuration.
 
-     * ✔ Start on boot
-     * ✔ Watchdog
+- Click **Settings → Add-ons → Add-on Store**
+- Search for **Mosquitto broker**, install it. After installation:
+   - Click **Start**
+   - Enable:
+
+     - ✔ Start on boot
+     - ✔ Watchdog
 
 ### Create MQTT Credentials
 
-1. Go to **Settings → People → Users**
-2. Create a dedicated MQTT user (recommended)
-3. Note:
+- Go to **Configuration → Logins → Add**
+- Create a dedicated MQTT user (recommended)
+- Note:
 
-   * Username
-   * Password
-   * Home Assistant IP address
-
----
-
-## 7. ESPresense Source Code
-
-### Clone Repository
-
-For development and customization, **clone the repository** instead of downloading ZIP files.
-
-```bash
-git clone https://github.com/Carla-Guo/ESPresense.git
-cd ESPresense
-```
-
-Wait for dependency installation and environment setup to complete.
+   - Username
+   - Password
+   - Home Assistant IP address
 
 ---
 
-## 8. Build & Flash ESPresense
 
-1. Build the firmware using the standard ESPresense build process
-2. Flash firmware to the XIAO ESP32C3
-3. After flashing completes successfully:
+## 2. Build & Flash ESPresense
 
-   * The device will reboot automatically
+- Download and open the [ESPresense code files](https://github.com/Carla-Guo/ESPresense). Wait for dependency installation and environment setup to complete.
+
+   > If you haven't set up Platform IO yet, please refer to this [guide](https://docs.platformio.org/en/latest/integration/ide/vscode.html) for download.
+
+- Select the **seeed_xiao_esp32c3** environment, build and upload.
+- Wait for the firmware flashing to complete, press the Reset button to restart the XIAO ESP32-C3.
+---
+## 3. Wi-Fi & MQTT Configuration (Captive Portal)
+
+- Power the XIAO ESP32C3
+- On your PC or phone, open **Wi-Fi settings**, connect to the ESPresense AP (e.g. `ESPresense-XXXX`)
+- Open browser: `http://192.168.4.1`
+- Fill in the following fields on the web page:
+
+   | Field              | Description                            |
+   | ------------------ | -------------------------------------- |
+   | **Room Name**      | Logical room identifier (e.g. `room1`) |
+   | **Wi-Fi SSID**     | 2.4 GHz network                        |
+   | **Wi-Fi Password** | Network password                       |
+   | **MQTT Broker IP** | Home Assistant IP                      |
+   | **MQTT Port**      | `1883` (default)                       |
+   | **MQTT Username**  | From Mosquitto setup                   |
+   | **MQTT Password**  | From Mosquitto setup                   |
+
+- Click **Save**
+- After saving, restart the XIAO ESP32-C3. The device will automatically connect to WiFi and MQTT.
+
+   > **Recommendation:**
+   > Deploy **at least two XIAO ESP32C3 nodes** in different rooms for meaningful presence comparison.
+
+- Now, open **Home Assistant**, navigate to **Settings → Devices & Services**
+- ESPresense nodes will appear automatically, device name format:
+
+   ```
+   ESPresense + <Room Name>
+   ```
 
 ---
 
-## 9. Wi-Fi & MQTT Configuration (Captive Portal)
-
-### Connect to ESPresense AP
-
-1. Power the XIAO ESP32C3
-2. On your PC or phone:
-
-   * Open **Wi-Fi settings**
-   * Connect to the ESPresense AP (e.g. `ESPresense-XXXX`)
-3. Open a browser
-4. Navigate to:
-
-```
-http://192.168.4.1
-```
-
----
-
-### Configuration Fields
-
-Fill in the following fields on the web page:
-
-| Field              | Description                            |
-| ------------------ | -------------------------------------- |
-| **Room Name**      | Logical room identifier (e.g. `room1`) |
-| **Wi-Fi SSID**     | 2.4 GHz network                        |
-| **Wi-Fi Password** | Network password                       |
-| **MQTT Broker IP** | Home Assistant IP                      |
-| **MQTT Port**      | `1883` (default)                       |
-| **MQTT Username**  | From Mosquitto setup                   |
-| **MQTT Password**  | From Mosquitto setup                   |
-
-> **Recommendation:**
-> Deploy **at least two XIAO ESP32C3 nodes** in different rooms for meaningful presence comparison.
-
-5. Click **Save**
-6. Device reboots and connects to Wi-Fi & MQTT
-
----
-
-## 10. Home Assistant Auto-Discovery
-
-After successful connection:
-
-1. Open **Home Assistant**
-2. Navigate to **Settings → Devices & Services**
-3. ESPresense nodes will appear automatically
-4. Device name format:
-
-```
-ESPresense + <Room Name>
-```
-
----
-
-## 11. BLE Device Broadcasting
+## 4. BLE Device Broadcasting
 
 ### iOS Devices
 
-* iPhones **broadcast automatically**
-* No additional setup required
+Apple devices emit various BTLE continuity messages, often identified by the fingerprint `apple:100?:*-*`.
+>In households with multiple iPhones, the nearby info may collide, leading to duplicate fingerprints.You can refer to https://espresense.com/devices/apple to resolve the issue.
 
 ### Android Devices (Manual Advertising)
 
-Android devices do not broadcast by default.
+Android devices are typically tight lipped and need an app to get them to emit BLE advertisements. Thus, the need for an app to allow us to find it.
 
-#### Using nRF Connect
+- Install **nRF Connect** and open the app.
+- Go to **ADVERTISER → "+" → ADD RECORD**, select **Manufacturer Data**
+- Fill in:
 
-1. Install **nRF Connect** from Google Play
-2. Open the app
-3. Go to **ADVERTISER** tab
-4. Tap **"+"**
-5. Tap **ADD RECORD**
-6. Select **Manufacturer Data**
+   | Field      | Value                                            |
+   | ---------- | ------------------------------------------------ |
+   | Company ID | `0x004C` (This is the fixed ID of Apple Inc., and all iBeacons must use this manufacturer ID.)                                 |
+   | Data       | `0215E2C56DB5DFFB48D2B060D0F5A71096E000010001C5` |
 
-Fill in:
+   **Data Format Explanation**
 
-| Field      | Value                                            |
-| ---------- | ------------------------------------------------ |
-| Company ID | `0x004C` (Apple)                                 |
-| Data       | `0215E2C56DB5DFFB48D2B060D0F5A71096E000010001C5` |
+   | Section         | Description     |
+   | --------------- | --------------- |
+   | `0215`          | iBeacon prefix  |
+   | `E2C56D...96E0` | UUID (16 bytes) |
+   | `0001`          | Major           |
+   | `0001`          | Minor           |
+   | `C5`            | Measured Power  |
 
-**Data Format Explanation**
+- Save and toggle advertising **ON**
 
-| Section         | Description     |
-| --------------- | --------------- |
-| `0215`          | iBeacon prefix  |
-| `E2C56D...96E0` | UUID (16 bytes) |
-| `0001`          | Major           |
-| `0001`          | Minor           |
-| `C5`            | Measured Power  |
-
-7. Tap **DONE**
-8. Open **Options**
-9. Adjust **Advertising Interval**
-10. Tap **Save**
-11. Toggle advertising **ON**
-
-Other supported devices:
+### Other supported devices:
 [https://espresense.com/devices](https://espresense.com/devices)
 
 ---
 
-## 12. MQTT Data Verification
+## 5. MQTT Data Verification
 
-### Using MQTT Explorer (PC)
+You can verify whether your MQTT messages are being published and subscribed successfully by checking the Mosquitto broker logs.
 
-1. Install **MQTT Explorer**
+Additionally, you can use MQTT Explorer to view all topics published by ESPresense.
+
+1. Install [**MQTT Explorer**](https://mqtt-explorer.com/)
 2. Connect to:
-
    * Host: HA IP
    * Port: 1883
    * Username / Password
 3. Browse topics:
 
-```
-espresense/devices/
-```
+   ```
+   espresense/devices/
+   ```
 
-Search using the **first 8 characters of your UUID**
-
----
-
-### Using Home Assistant MQTT Listener
-
-1. Go to **Settings → Devices & Services**
-2. Click **MQTT**
-3. Click **Configure**
-4. In **Listen to a topic**, enter:
-
-```
-espresense/devices/iBeacon:e2c56db5-dffb-48d2-b060-d0f5a71096e0-1-1/room1
-```
-
-Replace with your own device ID and room name.
+4. Search using the **first 8 characters of your UUID**
 
 ---
 
-## 13. Room Presence via MQTT Room Sensor
+
+## 6. Room Presence via MQTT Room Sensor
 
 ### Edit `configuration.yaml`
 
@@ -372,10 +251,9 @@ sensor:
     away_timeout: 120
 ```
 
-⚠ **YAML indentation is critical**
-
-* Use spaces only
-* Do not use TAB
+>⚠ **YAML indentation is critical**
+>* Use spaces only
+>* Do not use TAB
 
 6. Save:
 
@@ -393,7 +271,7 @@ sensor:
 
 ---
 
-## 14. Validation
+## 7. Validation
 
 After restart:
 
