@@ -1,4 +1,4 @@
-# Deploying ESPresense on Seeed Studio XIAO ESP32C3 with Home Assistant
+# Deploying ESPresense on Seeed Studio XIAO ESP32-C3 with Home Assistant
 
 This document describes how to integrate the open-source Bluetooth presence detection system, **ESPresense**, with the **Seeed Studio XIAO ESP32-C3**. The presence detection node based on the XIAO ESP32-C3 can work with the [MQTT Room component](https://www.home-assistant.io/components/sensor.mqtt_room/) of Home Assistant to enable indoor positioning.
 
@@ -28,8 +28,6 @@ build_flags =
   -D SENSORS
   ${esp32c3-cdc.build_flags}
 ```
-
----
 
 ### 2. Improved Reporting Responsiveness
 
@@ -66,7 +64,7 @@ This change helps reduce internal contention and minimizes latency caused by rad
 
 ## Hardware Requirements
 
-* Seeed Studio **XIAO ESP32C3**
+* Seeed Studio **XIAO ESP32-C3**
 * USB-C cable (data capable)
 * PC (Windows/macOS/Linux)
 * Stable Wi-Fi network (2.4 GHz)
@@ -78,7 +76,6 @@ This change helps reduce internal contention and minimizes latency caused by rad
 
 | Tool                               | Purpose                                               |
 | ---------------------------------- | ----------------------------------------------------- |
-| Git                                | Source code management                                |
 | **PlatformIO**                     | Build system & flashing tool                          |
 | ESP-IDF toolchain (via ESPresense) | Firmware build                                        |
 | Web browser                        | Device configuration                                  |
@@ -116,6 +113,11 @@ This change helps reduce internal contention and minimizes latency caused by rad
    - Password
    - Home Assistant IP address
 
+    <img width="2365" height="1812" alt="image" src="https://github.com/user-attachments/assets/68f931d6-d24c-436e-9c69-3dbc06b011b1" />
+  
+    <img width="3170" height="1703" alt="image" src="https://github.com/user-attachments/assets/eae2c478-163c-4048-836c-4b721f4b44b6" />
+
+
 ---
 
 
@@ -125,14 +127,25 @@ This change helps reduce internal contention and minimizes latency caused by rad
 
    > If you haven't set up Platform IO yet, please refer to this [guide](https://docs.platformio.org/en/latest/integration/ide/vscode.html) for download.
 
-- Select the **seeed_xiao_esp32c3** environment, build and upload.
+- Select the **seeed_xiao_esp32c3** environment, select the correct port, build and upload.
+  
+  <img width="1920" height="1015" alt="image" src="https://github.com/user-attachments/assets/072622da-defd-4e7c-af3d-f2a8b1df3466" />
+
 - Wait for the firmware flashing to complete, press the Reset button to restart the XIAO ESP32-C3.
+
 ---
 ## 3. Wi-Fi & MQTT Configuration (Captive Portal)
 
-- Power the XIAO ESP32C3
+- Power the XIAO ESP32-C3
+  
 - On your PC or phone, open **Wi-Fi settings**, connect to the ESPresense AP (e.g. `ESPresense-XXXX`)
+  
+  <img width="400" height= auto alt="image" src="https://github.com/user-attachments/assets/4b2065b6-bdf1-485e-980b-fea265b34646" />
+
 - Open browser: `http://192.168.4.1`
+  
+  <img width="3730" height="1928" alt="image" src="https://github.com/user-attachments/assets/b415ca5e-cc7c-41db-aaa6-7a61ec3eb071" />
+
 - Fill in the following fields on the web page:
 
    | Field              | Description                            |
@@ -149,18 +162,25 @@ This change helps reduce internal contention and minimizes latency caused by rad
 - After saving, restart the XIAO ESP32-C3. The device will automatically connect to WiFi and MQTT.
 
    > **Recommendation:**
-   > Deploy **at least two XIAO ESP32C3 nodes** in different rooms for meaningful presence comparison.
+   > Deploy **at least two XIAO ESP32-C3 nodes** in different rooms for meaningful presence comparison.
 
 - Now, open **Home Assistant**, navigate to **Settings → Devices & Services**
+  
+
 - ESPresense nodes will appear automatically, device name format:
 
    ```
    ESPresense + <Room Name>
    ```
+  <img width="3839" height="1822" alt="image" src="https://github.com/user-attachments/assets/15b729a8-fa42-4afe-a863-118bca700f24" />
+
+  <img width="1920" height="877" alt="image" src="https://github.com/user-attachments/assets/6c18f249-01bb-4c31-af50-a328f77242fe" />
 
 ---
 
 ## 4. BLE Device Broadcasting
+
+Next, we need to make your personal device discoverable by ESPresense via BLE. In some cases, you may need to install an app to enable your device to broadcast over BLE.
 
 ### iOS Devices
 
@@ -177,7 +197,7 @@ Android devices are typically tight lipped and need an app to get them to emit B
 
    | Field      | Value                                            |
    | ---------- | ------------------------------------------------ |
-   | Company ID | `0x004C` (This is the fixed ID of Apple Inc., and all iBeacons must use this manufacturer ID.)                                 |
+   | Company ID | `0x004C` (This is the fixed ID of Apple Inc., and all iBeacons must use this manufacturer ID.)|
    | Data       | `0215E2C56DB5DFFB48D2B060D0F5A71096E000010001C5` |
 
    **Data Format Explanation**
@@ -191,71 +211,74 @@ Android devices are typically tight lipped and need an app to get them to emit B
    | `C5`            | Measured Power  |
 
 - Save and toggle advertising **ON**
+  
+  <img width="400" height= auto alt="image" src="https://github.com/user-attachments/assets/0d46eddc-968e-4f3f-8ee0-638afbcbc4a3" />   <img width="400" height= auto alt="image" src="https://github.com/user-attachments/assets/160594ad-27e5-41f0-9a5d-9d49742b328e" />
+
+
 
 ### Other supported devices:
 [https://espresense.com/devices](https://espresense.com/devices)
 
 ---
 
-## 5. MQTT Data Verification
+### MQTT Data Verification
 
-You can verify whether your MQTT messages are being published and subscribed successfully by checking the Mosquitto broker logs.
-
-Additionally, you can use MQTT Explorer to view all topics published by ESPresense.
-
-1. Install [**MQTT Explorer**](https://mqtt-explorer.com/)
-2. Connect to:
+You can use [**MQTT Explorer**](https://mqtt-explorer.com/) to view all topics published by ESPresense.
+-  Connect to:
    * Host: HA IP
    * Port: 1883
    * Username / Password
-3. Browse topics:
 
-   ```
-   espresense/devices/
-   ```
+  <img width="1521" height="991" alt="image" src="https://github.com/user-attachments/assets/2f32c51a-3a4d-45c3-a627-46860cbd4ae2" />
 
-4. Search using the **first 8 characters of your UUID**
+  <img width="1920" height="944" alt="image" src="https://github.com/user-attachments/assets/4763b409-82b5-48f8-bc92-bc4111526698" />
+
+-  Search using the **first 8 characters of your UUID**
+  
+  <img width="1920" height="944" alt="image" src="https://github.com/user-attachments/assets/3c953155-2c01-44c0-8412-3d9a8dbb1c87" />
+
+      
 
 ---
 
 
-## 6. Room Presence via MQTT Room Sensor
+## 5. Room Presence via MQTT Room Sensor
 
 ### Edit `configuration.yaml`
 
-1. Go to **Settings → Add-ons → Terminal**
-2. Open terminal
-3. Run:
+- Go to **Settings → Add-ons → Terminal**, open terminal
+-  Run:
 
-```bash
-ls /config
-```
+    ```bash
+    ls /config
+    ```
+    Confirm `configuration.yaml` exists.
 
-Confirm `configuration.yaml` exists.
+- Edit the file:
 
-4. Edit the file:
+    ```bash
+    nano /config/configuration.yaml
+    ```
+    <img width="1665" height="723" alt="image" src="https://github.com/user-attachments/assets/cd334a3f-2b13-45b4-af3f-89d4659125f0" />
 
-```bash
-nano /config/configuration.yaml
-```
+- Append:
 
-5. Append:
-
-```yaml
-sensor:
-  - platform: mqtt_room
-    device_id: "iBeacon:e2c56db5-dffb-48d2-b060-d0f5a71096e0-1-1"
-    name: "My iBeacon"
-    state_topic: "espresense/devices/iBeacon:e2c56db5-dffb-48d2-b060-d0f5a71096e0-1-1"
-    timeout: 60
-    away_timeout: 120
-```
+    ```yaml
+    sensor:
+      - platform: mqtt_room
+        device_id: "iBeacon:e2c56db5-dffb-48d2-b060-d0f5a71096e0-1-1"
+        name: "My iBeacon"
+        state_topic: "espresense/devices/iBeacon:e2c56db5-dffb-48d2-b060-d0f5a71096e0-1-1"
+        timeout: 60
+        away_timeout: 120
+    ```
+    <img width="1888" height="877" alt="image" src="https://github.com/user-attachments/assets/124f720b-145f-47a9-a096-d8e80ecdfa74" />
 
 >⚠ **YAML indentation is critical**
 >* Use spaces only
 >* Do not use TAB
 
-6. Save:
+- Save:
 
    * `Ctrl + O` → Enter
    * `Ctrl + X`
@@ -264,26 +287,34 @@ sensor:
 
 ### Validate & Restart
 
-1. Go to **Settings → System → Developer Tools**
-2. Open **YAML** tab
-3. Click **Check Configuration**
-4. If valid, click **Restart**
+- Go to **Settings → System → Developer Tools**
+- Open **YAML** tab, click **Check Configuration**, if valid, click **Restart**
+
+<img width="1754" height="749" alt="image" src="https://github.com/user-attachments/assets/29c7a513-5672-45b7-92de-208e72c87a06" />
 
 ---
 
-## 7. Validation
+## 6. Add entities to your dashboard
 
 After restart:
 
-1. Go to **Developer Tools → States**
-2. Search for:
+- Go to **Developer Tools → States**
+- Search for:
 
-```
-sensor.my_ibeacon
-```
+    ```
+    sensor.my_ibeacon
+    ```
 
-3. If the entity updates with room names, setup is complete
-4. Add the entity to your **Dashboard**
+- If the entity updates with room names, setup is complete
+  
+  <img width="1270" height="876" alt="image" src="https://github.com/user-attachments/assets/141503f0-2e59-46ac-a6b5-246279f8da2f" />
+
+    >Sensor initialization may take some time. If the status shows not_home, please wait patiently for a while. If there is still no state update after an extended period, we recommend using MQTT Explorer to check whether ESPresense has gone offline or to verify that your personal device can be successfully scanned.
+
+- Add the entity to your **Dashboard**
+  
+  <img width="1101" height="1292" alt="image" src="https://github.com/user-attachments/assets/fa639868-edfa-41e1-adb0-8f86405c6b10" />
+
 
 ---
 
