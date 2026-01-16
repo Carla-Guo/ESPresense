@@ -1,5 +1,18 @@
 # Deploying ESPresense on Seeed Studio XIAO ESP32-C3 with Home Assistant
 
+<p align="center">
+    <img width="200" height= auto alt="image" src="https://github.com/user-attachments/assets/01f773b2-9588-4506-bf08-0d8307cc4b38" />
+
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Hardware-XIAO ESP32C3 -red" alt="XIAO ESP32-C3">
+  <img src="https://img.shields.io/badge/Automation Center-Home Assistant-41BDF5" alt="Home Assistant"> 
+  <img src="https://img.shields.io/badge/Development tools-PlatformIO-orange" alt="Arduino">
+  <img src="https://img.shields.io/badge/Communication Signal-BLE-blue" alt="Home Assistant">
+  <img src="https://img.shields.io/badge/Transmission Protocol-MQTT-green" alt="MQTT">
+</p>
+
 This document describes how to integrate the open-source Bluetooth presence detection system, **ESPresense**, with the **Seeed Studio XIAO ESP32-C3**. The presence detection node based on the XIAO ESP32-C3 can work with the [MQTT Room component](https://www.home-assistant.io/components/sensor.mqtt_room/) of Home Assistant to enable indoor positioning.
 
 ---
